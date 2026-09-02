@@ -16,7 +16,7 @@ import { FAQS, SITE } from "@/content/site";
 import { getSiteContact, getHomepageCopy } from "@/lib/data/settings";
 import { getDestinationCards } from "@/lib/data/countries";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 // The FAQ accordion and this markup read from the same source, so they can
 // never drift — a mismatch between the two is a manual-action risk in Search.

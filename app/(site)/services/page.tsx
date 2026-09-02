@@ -7,7 +7,7 @@ import Counselling from "@/components/sections/Counselling";
 import FinalCta from "@/components/sections/FinalCta";
 import { SERVICES } from "@/content/site";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 export const metadata: Metadata = {
   title: "Services",

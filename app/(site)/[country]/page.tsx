@@ -15,7 +15,7 @@ import {
 import { getCountryPage, getPublishedCountrySlugs } from "@/lib/data/countries";
 import { normalizeSections } from "@/lib/countries-sections";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 // Content comes from the `countries` table. Published slugs are pre-rendered;
 // dynamicParams:true lets a newly published country render on first request.

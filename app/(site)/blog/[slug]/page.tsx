@@ -8,7 +8,7 @@ import FinalCta from "@/components/sections/FinalCta";
 import { formatPostDate } from "@/content/blog";
 import { getPost, getPublishedPosts, getPublishedPostSlugs } from "@/lib/data/blog";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 export const dynamicParams = true;
 

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Bricolage_Grotesque, Plus_Jakarta_Sans } from "next/font/google";
 import { SITE } from "@/content/site";
+import { SITE_URL } from "@/lib/site-url";
 import "./globals.css";
 
 const bricolage = Bricolage_Grotesque({
@@ -15,10 +16,8 @@ const jakarta = Plus_Jakarta_Sans({
   display: "swap",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
-
 export const metadata: Metadata = {
-  metadataBase: new URL(siteUrl),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Study Abroad Pro — Your Global Education Journey Starts Here",
     template: "%s | Study Abroad Pro",

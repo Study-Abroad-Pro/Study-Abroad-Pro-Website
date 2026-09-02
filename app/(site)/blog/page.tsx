@@ -5,7 +5,7 @@ import ScrollReveals from "@/components/motion/ScrollReveals";
 import PostCard from "@/components/blog/PostCard";
 import { getPublishedPosts } from "@/lib/data/blog";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
 export const metadata: Metadata = {
   title: "Blog",
