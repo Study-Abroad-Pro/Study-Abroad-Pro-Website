@@ -106,10 +106,10 @@
    the globe spins in place, then everything scrolls on. `#hero` keeps
    `z-index: auto` so the fixed globe canvas still sits between the sky and this
    sticky copy (which owns a z-40 context).
-   The hold is `min-height − 100svh`. That equals `M_HOLD` in GlobeStage.tsx
-   (currently 110%) AND lines the copy release up exactly with #destinations
-   entering the viewport, so there's no empty gap. Keep the numbers in sync.
-   Motion-safe + mobile only. */
+   The hold length is `min-height − 100svh` (currently 110svh) — the only place
+   it's defined; GlobeStage.tsx's timeline just runs `#hero top→bottom`.
+   Chosen so the copy unsticks exactly as #destinations enters the viewport, so
+   there's no empty gap. Motion-safe + mobile only. */
 @media (max-width: 1023px) and (prefers-reduced-motion: no-preference) {
   #hero {
     min-height: 210svh;

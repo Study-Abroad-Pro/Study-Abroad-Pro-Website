@@ -17,6 +17,12 @@ import {
 
 gsap.registerPlugin(ScrollTrigger, useGSAP);
 
+// Mobile browsers fire a resize every time the address bar shows/hides on
+// scroll. Left alone that runs ScrollTrigger.refresh() mid-scroll and the
+// scrubbed hero animation visibly jumps. This ignores toolbar-only resizes
+// (a real width change — rotation — still refreshes).
+ScrollTrigger.config({ ignoreMobileResize: true });
+
 const GlobeCanvas = dynamic(() => import("./GlobeCanvas"), { ssr: false });
 
 /** Full pinned choreography. Everything else gets a lighter treatment. */
@@ -33,13 +39,12 @@ const STILL = "(prefers-reduced-motion: reduce)";
  *
  * Dials — tune against a real device, a WebGL globe can't be previewed in a
  * headless build. `cy` lower = globe sits lower; `radius` bigger = fills more
- * width. `M_HOLD` MUST equal `min-height − 100svh` from the globals.css rule.
+ * width. The hold length lives entirely in globals.css (`#hero` min-height);
+ * the timeline below just runs `#hero top→bottom`, so the two can't drift.
  */
 const M_HERO = { cx: 0.04, cy: -0.68, radius: 0.62 };
 /** Radians the globe turns across the mobile hero hold. */
 const M_TURNS = -Math.PI * 3;
-/** Length of the sticky "hold" (== 210svh − 100svh in globals.css). */
-const M_HOLD = "+=110%";
 
 /**
  * Owns the one persistent WebGL canvas and every ScrollTrigger that drives it.
@@ -264,14 +269,16 @@ export default function GlobeStage() {
       gsap.set(".dest-card", { opacity: 1, y: 0, filter: "none" });
       gsap.set(".hero-student", { clearProps: "opacity,transform" });
 
-      // While the copy is held by `position: sticky` (globals.css, M_HOLD of
-      // scroll) the globe just turns — full opacity the whole time so it keeps
-      // filling the lower half of the screen. The traveller fades over this.
+      // While the copy is held by `position: sticky` (globals.css) the globe
+      // just turns — full opacity the whole time so it keeps filling the lower
+      // half of the screen. The traveller fades over this. The window is the
+      // whole #hero scroll (top→bottom), which tracks the live viewport, so it
+      // can't drift from the CSS hold when the mobile toolbar shows/hides.
       const hold = gsap.timeline({
         scrollTrigger: {
           trigger: "#hero",
           start: "top top",
-          end: M_HOLD,
+          end: "bottom bottom",
           scrub: 0.5,
           invalidateOnRefresh: true,
         },
