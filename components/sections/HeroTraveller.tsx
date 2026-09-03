@@ -26,7 +26,7 @@ export default function HeroTraveller() {
         width={480}
         height={1048}
         priority
-        className="hero-student pointer-events-none absolute bottom-0 left-1/2 h-[clamp(175px,28svh,250px)] w-auto -translate-x-1/2 select-none sm:h-[42svh] sm:-translate-x-[58%] lg:h-[58svh] lg:-translate-x-[24%] xl:-translate-x-[10%]"
+        className="hero-student pointer-events-none absolute bottom-[4.25rem] left-1/2 h-[clamp(150px,27svh,245px)] w-auto -translate-x-1/2 select-none sm:bottom-0 sm:h-[42svh] sm:-translate-x-[58%] lg:h-[58svh] lg:-translate-x-[24%] xl:-translate-x-[10%]"
       />
     </div>
   );

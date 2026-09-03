@@ -152,6 +152,19 @@
   }
 }
 
+/* On phones the traveller stands on top of the sticky "Free Counselling"
+   button — anchored to the viewport bottom the same way that button is, so
+   the two track together and the button never clips the figure's legs. The
+   image's own `bottom` offset (HeroTraveller.tsx) sits its feet at the
+   button's top edge. Desktop keeps `top: 0` (traveller at the screen edge,
+   standing on the desktop globe). */
+@media (max-width: 1023px) and (prefers-reduced-motion: no-preference) {
+  .hero-traveller-layer {
+    top: auto;
+    bottom: 0;
+  }
+}
+
 /* Destination cards are stacked on top of each other on desktop (one visible
    at a time, driven by scroll) and become a plain grid everywhere else. */
 @media (min-width: 1024px) {
