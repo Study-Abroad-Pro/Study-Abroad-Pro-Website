@@ -48,7 +48,9 @@ export default function Hero() {
       <div className="hero-sky absolute inset-0" aria-hidden="true">
         <div className="absolute inset-0 bg-[radial-gradient(125%_95%_at_60%_80%,#ffe6c8_0%,#fff3e6_36%,#f8fafc_74%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(46%_38%_at_57%_68%,rgba(255,186,112,0.9),transparent_70%)]" />
-        <div className="absolute inset-x-0 bottom-0 h-[24%] bg-gradient-to-t from-[#e9e5df] via-[#f2eee8]/60 to-transparent" />
+        {/* Desktop-only "ground" under the globe. On mobile it lands right on the
+            section seam and reads as a hard grey line. */}
+        <div className="absolute inset-x-0 bottom-0 hidden h-[24%] bg-gradient-to-t from-[#e9e5df] via-[#f2eee8]/60 to-transparent lg:block" />
       </div>
 
       {/* ---- flight path + destination flags ---- */}
@@ -137,10 +139,11 @@ export default function Hero() {
       </div>
 
       {/* ---- stat bar ---- */}
-      {/* Legibility scrim: the photoreal globe runs dark behind the stats.
-          Shares the .hero-stats class so it fades on the same tween. */}
+      {/* Legibility scrim for the desktop stats, which sit over the globe.
+          Mobile has no hero stats and no scrim — a scrim there just washes out
+          the globe and leaves a hard edge at the section seam. */}
       <div
-        className="hero-stats pointer-events-none absolute bottom-0 left-0 z-30 h-[34%] w-full bg-[linear-gradient(to_top,rgba(255,250,244,0.98)_0%,rgba(255,250,244,0.62)_52%,transparent_100%)] lg:h-[40%] lg:w-[64%] lg:[mask-image:linear-gradient(to_right,black_0%,black_46%,transparent_86%)] lg:[-webkit-mask-image:linear-gradient(to_right,black_0%,black_46%,transparent_86%)]"
+        className="hero-stats pointer-events-none absolute bottom-0 left-0 z-30 hidden h-[40%] w-full bg-[linear-gradient(to_top,rgba(255,250,244,0.98)_0%,rgba(255,250,244,0.62)_52%,transparent_100%)] [mask-image:linear-gradient(to_right,black_0%,black_46%,transparent_86%)] [-webkit-mask-image:linear-gradient(to_right,black_0%,black_46%,transparent_86%)] lg:block lg:w-[64%]"
         aria-hidden="true"
       />
       <ul className="hero-stats absolute bottom-8 left-6 z-40 hidden flex-wrap items-center gap-x-9 gap-y-4 sm:left-10 lg:bottom-10 lg:flex">

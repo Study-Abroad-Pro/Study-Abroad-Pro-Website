@@ -25,21 +25,20 @@ const LITE = "(prefers-reduced-motion: no-preference) and ((max-width: 1023px) o
 const STILL = "(prefers-reduced-motion: reduce)";
 
 /**
- * Portrait composition for the globe. On a phone the hero shows a big low
- * horizon that turns as you scroll; the handoff then pulls it back to a small
- * centred planet that fades out just as the destinations list begins. No
- * pinning — the page scrolls normally the whole way.
+ * Portrait composition for the globe. On a phone the hero shows a large globe
+ * that turns as you scroll, then sinks and fades out before the destinations
+ * section — its fixed canvas sits *above* that section, so it has to be gone by
+ * the time the cards arrive. No pinning: the page scrolls normally throughout.
  *
  * These are the mobile visibility dials. A WebGL globe can't be previewed in a
- * headless build, so tune the four-number anchors and the turn count against a
- * real device.
+ * headless build, so tune `M_HERO` and the turn count against a real device.
+ * `cy` lower = globe sits lower; `radius` bigger = fills more width.
  */
 const M_HERO = { cx: 0.05, cy: -0.95, radius: 1.05 };
-const M_STAGE = { cx: 0, cy: -0.2, radius: 0.5 };
-/** Radians the globe turns across the hero portion of the mobile scroll. */
+/** Radians the globe turns across the mobile hero scroll. */
 const M_TURNS = -Math.PI * 2.5;
-/** Fraction of the mobile scroll sequence spent on the hero spin vs the handoff. */
-const M_SPLIT = 0.62;
+/** Fraction of the hero scroll spent turning before the globe sinks + fades. */
+const M_SPLIT = 0.7;
 
 /**
  * Owns the one persistent WebGL canvas and every ScrollTrigger that drives it.
@@ -255,8 +254,6 @@ export default function GlobeStage() {
       // compositor once it fades, so the loop stays on for the whole sequence.
       setFrameloop("always");
 
-      const lerp = gsap.utils.interpolate;
-
       globe.cx = M_HERO.cx;
       globe.cy = M_HERO.cy;
       globe.radius = M_HERO.radius;
@@ -264,39 +261,53 @@ export default function GlobeStage() {
       globe.active = -1;
       globe.spin = 0;
       gsap.set(".dest-card", { opacity: 1, y: 0, filter: "none" });
+      gsap.set(".hero-student", { clearProps: "opacity,transform" });
 
-      // A single trigger spanning the hero *and* the run-in to the destinations
-      // section drives everything from one progress value, so nothing fights
-      // over the shared globe object. The page is never pinned.
+      // Turn the globe as the hero scrolls, then sink + fade it out inside the
+      // hero. It must reach opacity 0 before #destinations scrolls in, because
+      // the fixed canvas paints on top of that section on mobile.
       const seq = ScrollTrigger.create({
         trigger: "#hero",
         start: "top top",
-        endTrigger: "#destinations",
-        end: "top 12%",
+        end: "bottom top",
         scrub: 0.5,
         onUpdate: (self) => {
           const p = self.progress;
+          globe.spin = M_TURNS * p;
           if (p <= M_SPLIT) {
-            // Hero: hold the low horizon, just turn the globe.
-            const t = p / M_SPLIT;
-            globe.cx = M_HERO.cx;
             globe.cy = M_HERO.cy;
             globe.radius = M_HERO.radius;
-            globe.spin = M_TURNS * t;
             globe.opacity = 1;
           } else {
-            // Handoff: drift to centre, shrink to a planet, fade under the cards.
             const t = (p - M_SPLIT) / (1 - M_SPLIT);
-            globe.cx = lerp(M_HERO.cx, M_STAGE.cx, t);
-            globe.cy = lerp(M_HERO.cy, M_STAGE.cy, t);
-            globe.radius = lerp(M_HERO.radius, M_STAGE.radius, t);
-            globe.spin = M_TURNS * (1 + 0.35 * t);
-            globe.opacity = t < 0.5 ? 1 : Math.max(0, 1 - (t - 0.5) / 0.4);
+            globe.cy = M_HERO.cy - 0.4 * t;
+            globe.radius = M_HERO.radius;
+            globe.opacity = Math.max(0, 1 - t / 0.55);
           }
         },
       });
 
+      // The traveller fades on scroll the way it does on desktop — its
+      // page-level layer means the pinned timeline's fade never runs here.
+      const student = gsap.fromTo(
+        ".hero-student",
+        { opacity: 1, y: 0 },
+        {
+          opacity: 0,
+          y: 60,
+          ease: "none",
+          scrollTrigger: {
+            trigger: "#hero",
+            start: "22% top",
+            end: "70% top",
+            scrub: 0.4,
+          },
+        },
+      );
+
       return () => {
+        student.scrollTrigger?.kill();
+        student.kill();
         seq.kill();
       };
     });
