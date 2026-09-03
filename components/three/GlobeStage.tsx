@@ -26,23 +26,20 @@ const STILL = "(prefers-reduced-motion: reduce)";
 
 /**
  * Portrait composition for the globe. On a phone the hero copy sticks to the
- * top for a little over one screen (the sticky rule in globals.css) while the
- * globe turns in place; then it sinks and fades out and the page scrolls on.
- * The globe must be gone before the destinations section arrives — its fixed
- * canvas paints on top of those cards.
+ * top (the sticky rule in globals.css) while the globe turns in place; it stays
+ * full-opacity for the whole hold — filling the lower half of the screen — then
+ * sinks and fades out as the hero leaves and #destinations takes over. Anything
+ * shorter leaves an empty band under the copy at the tail of the hold.
  *
  * Dials — tune against a real device, a WebGL globe can't be previewed in a
  * headless build. `cy` lower = globe sits lower; `radius` bigger = fills more
- * width; `M_HOLD` is the sticky scroll window and MUST match the 220svh/100svh
- * split in globals.css; `M_SPLIT` is turn time vs sink-and-fade time.
+ * width. `M_HOLD` MUST equal `min-height − 100svh` from the globals.css rule.
  */
 const M_HERO = { cx: 0.05, cy: -0.85, radius: 0.9 };
 /** Radians the globe turns across the mobile hero hold. */
 const M_TURNS = -Math.PI * 3;
-/** Length of the sticky "hold" (== 220svh − 100svh in globals.css). */
-const M_HOLD = "+=120%";
-/** Fraction of the hold spent turning before the globe sinks + fades. */
-const M_SPLIT = 0.72;
+/** Length of the sticky "hold" (== 210svh − 100svh in globals.css). */
+const M_HOLD = "+=110%";
 
 /**
  * Owns the one persistent WebGL canvas and every ScrollTrigger that drives it.
@@ -267,11 +264,10 @@ export default function GlobeStage() {
       gsap.set(".dest-card", { opacity: 1, y: 0, filter: "none" });
       gsap.set(".hero-student", { clearProps: "opacity,transform" });
 
-      // The hero copy is held by `position: sticky` (globals.css) for `M_HOLD`
-      // of scroll. This scrubbed timeline runs over exactly that window: the
-      // globe turns, then sinks + fades — it has to reach opacity 0 before the
-      // copy unsticks, because the fixed canvas paints on top of what's next.
-      const tl = gsap.timeline({
+      // While the copy is held by `position: sticky` (globals.css, M_HOLD of
+      // scroll) the globe just turns — full opacity the whole time so it keeps
+      // filling the lower half of the screen. The traveller fades over this.
+      const hold = gsap.timeline({
         scrollTrigger: {
           trigger: "#hero",
           start: "top top",
@@ -281,28 +277,35 @@ export default function GlobeStage() {
         },
       });
 
-      tl
-        .to(globe, { spin: M_TURNS, ease: "none", duration: M_SPLIT }, 0)
+      hold
+        .to(globe, { spin: M_TURNS, ease: "none", duration: 1 }, 0)
         .fromTo(
           ".hero-student",
           { opacity: 1, y: 0 },
-          { opacity: 0, y: 60, ease: "power1.in", duration: 0.55 },
-          0.16,
-        )
-        .fromTo(
-          globe,
-          { cy: M_HERO.cy },
-          { cy: M_HERO.cy - 0.45, ease: "power1.in", duration: 1 - M_SPLIT, immediateRender: false },
-          M_SPLIT,
-        )
-        // Fade finishes a touch before the copy unsticks, so the canvas is gone
-        // by the time the next section scrolls under it.
-        .fromTo(
-          globe,
-          { opacity: 1 },
-          { opacity: 0, ease: "power1.in", duration: (1 - M_SPLIT) * 0.72, immediateRender: false },
-          M_SPLIT,
+          { opacity: 0, y: 60, ease: "power1.in", duration: 0.7 },
+          0.1,
         );
+
+      // Sink + fade the globe out as the hero leaves — the sticky rule is sized
+      // so the copy unsticks exactly as #destinations enters, and this runs over
+      // the run-in so the canvas (which paints on top of the next section) is
+      // gone by the time its heading shows.
+      const exit = gsap.fromTo(
+        globe,
+        { cy: M_HERO.cy, opacity: 1 },
+        {
+          cy: M_HERO.cy - 0.3,
+          opacity: 0,
+          ease: "power1.in",
+          immediateRender: false,
+          scrollTrigger: {
+            trigger: "#hero",
+            start: "bottom bottom",
+            end: "bottom 72%",
+            scrub: 0.4,
+          },
+        },
+      );
 
       // A smooth, simple staggered entrance for the flag chips the first time
       // they're on screen.
@@ -322,8 +325,10 @@ export default function GlobeStage() {
         : null;
 
       return () => {
-        tl.scrollTrigger?.kill();
-        tl.kill();
+        hold.scrollTrigger?.kill();
+        hold.kill();
+        exit.scrollTrigger?.kill();
+        exit.kill();
         chipsIn?.scrollTrigger?.kill();
         chipsIn?.kill();
       };
