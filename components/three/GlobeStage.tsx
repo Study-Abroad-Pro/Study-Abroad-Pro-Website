@@ -35,7 +35,7 @@ const STILL = "(prefers-reduced-motion: reduce)";
  * headless build. `cy` lower = globe sits lower; `radius` bigger = fills more
  * width. `M_HOLD` MUST equal `min-height − 100svh` from the globals.css rule.
  */
-const M_HERO = { cx: 0.05, cy: -0.85, radius: 0.9 };
+const M_HERO = { cx: 0.04, cy: -0.68, radius: 0.62 };
 /** Radians the globe turns across the mobile hero hold. */
 const M_TURNS = -Math.PI * 3;
 /** Length of the sticky "hold" (== 210svh − 100svh in globals.css). */
