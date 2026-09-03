@@ -91,21 +91,21 @@ export default function Hero() {
           canvas. GSAP still animates it via the shared `.hero-student` class. */}
 
       {/* ---- copy ---- */}
-      <div className="hero-copy relative z-40 mx-auto flex h-full w-full max-w-[86rem] flex-col justify-start px-6 pt-28 sm:px-10 lg:justify-center lg:pt-0">
+      <div className="hero-copy relative z-40 mx-auto flex h-full w-full max-w-[86rem] flex-col justify-start px-6 pt-16 sm:px-10 lg:justify-center lg:pt-0">
         <p className="label text-ink/70">{SITE.tagline}</p>
         <span className="mt-4 block h-[3px] w-12 rounded-full bg-brand" aria-hidden="true" />
-        <h1 className="mt-6 max-w-[13ch] text-[clamp(2.5rem,5.2vw,4.6rem)] font-extrabold leading-[0.95]">
+        <h1 className="mt-5 max-w-[13ch] text-[clamp(2.5rem,5.2vw,4.6rem)] font-extrabold leading-[0.95] lg:mt-6">
           Your Future
           <br />
           <span className="text-brand">Has No Borders.</span>
         </h1>
-        <p className="mt-6 max-w-[34ch] text-[1.0625rem] leading-relaxed text-ink-soft sm:text-lg">
+        <p className="mt-5 max-w-[34ch] text-[1.0625rem] leading-relaxed text-ink-soft sm:text-lg lg:mt-6">
           Choose the right country. Find the right course. Build the right future.
         </p>
         {/* Compact destination strip — the flight-arc flags don't fit portrait.
             Sits above the buttons so it clears the globe that rises behind the
             lower half of the mobile hero. */}
-        <div className="hero-flag-strip mt-9 lg:hidden">
+        <div className="hero-flag-strip mt-7 lg:hidden">
           <p className="label text-ink/55">Popular destinations</p>
           <ul className="mt-3 flex gap-2.5" aria-label="Popular study destinations">
             {ARC_ORDER.map((code) => {
@@ -121,7 +121,7 @@ export default function Hero() {
           </ul>
         </div>
 
-        <div className="mt-9 flex flex-wrap items-center gap-3">
+        <div className="mt-7 flex flex-wrap items-center gap-3 lg:mt-9">
           <Button href="/#counselling">Book Free Counselling</Button>
           <Button href="/destinations" variant="ghost">
             Explore Destinations
