@@ -83,10 +83,9 @@
 
 /* The hero traveller (HeroTraveller.tsx) rides one level above the globe
    canvas (z-index 10) so it stands in front of the planet, not behind it.
-   Only the full pinned desktop choreography needs `fixed` — there ScrollTrigger
-   makes #hero a stacking context that would otherwise trap the student behind
-   the globe. Every lighter mode keeps this layer in normal flow at the top of
-   the page so the student scrolls away with the hero, unchanged. */
+   Whenever motion is allowed the hero is "held" (a desktop pin, or the mobile
+   sticky copy below), so the traveller must be `fixed` to hold with it and
+   fade on scroll. Reduced motion keeps it in normal flow so it scrolls away. */
 .hero-traveller-layer {
   position: absolute;
   top: 0;
@@ -96,10 +95,28 @@
   z-index: 11;
   pointer-events: none;
 }
-@media (min-width: 1024px) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+@media (prefers-reduced-motion: no-preference) {
   .hero-traveller-layer {
     position: fixed;
     height: 100%;
+  }
+}
+
+/* Mobile hero "hold": the copy (and its flag strip) sticks to the top for a
+   little over one screen while the globe spins in place, then everything
+   scrolls on. `#hero` keeps `z-index: auto` so the fixed globe canvas still
+   sits between the sky and this sticky copy (which owns a z-40 context).
+   The 220svh / 100svh split == the +=120% scroll window in GlobeStage.tsx
+   (M_HOLD) — keep them in sync. Motion-safe + mobile only. */
+@media (max-width: 1023px) and (prefers-reduced-motion: no-preference) {
+  #hero {
+    min-height: 220svh;
+    overflow: visible;
+  }
+  #hero > .hero-copy {
+    position: sticky;
+    top: 0;
+    height: 100svh;
   }
 }
 

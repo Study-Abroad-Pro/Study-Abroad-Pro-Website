@@ -43,7 +43,7 @@ export default function Hero() {
   const byCode = new Map(DESTINATIONS.map((d) => [d.code, d] as const));
 
   return (
-    <section id="hero" className="relative min-h-[115svh] w-full overflow-hidden bg-cream lg:h-[100svh] lg:min-h-0">
+    <section id="hero" className="relative min-h-[100svh] w-full overflow-hidden bg-cream lg:h-[100svh] lg:min-h-0">
       {/* ---- sky: warm sunset gradient, fades away as the globe takes over ---- */}
       <div className="hero-sky absolute inset-0" aria-hidden="true">
         <div className="absolute inset-0 bg-[radial-gradient(125%_95%_at_60%_80%,#ffe6c8_0%,#fff3e6_36%,#f8fafc_74%)]" />
@@ -102,21 +102,16 @@ export default function Hero() {
         <p className="mt-6 max-w-[34ch] text-[1.0625rem] leading-relaxed text-ink-soft sm:text-lg">
           Choose the right country. Find the right course. Build the right future.
         </p>
-        <div className="mt-9 flex flex-wrap items-center gap-3">
-          <Button href="/#counselling">Book Free Counselling</Button>
-          <Button href="/destinations" variant="ghost">
-            Explore Destinations
-          </Button>
-        </div>
-
-        {/* Compact destination strip — the flight-arc flags don't fit portrait. */}
-        <div className="mt-10 lg:hidden">
-          <p className="label text-ink/50">Popular destinations</p>
+        {/* Compact destination strip — the flight-arc flags don't fit portrait.
+            Sits above the buttons so it clears the globe that rises behind the
+            lower half of the mobile hero. */}
+        <div className="hero-flag-strip mt-9 lg:hidden">
+          <p className="label text-ink/55">Popular destinations</p>
           <ul className="mt-3 flex gap-2.5" aria-label="Popular study destinations">
             {ARC_ORDER.map((code) => {
               const d = byCode.get(code)!;
               return (
-                <li key={code}>
+                <li key={code} className="hero-flag-chip">
                   <span className="grid h-8 w-8 place-items-center overflow-hidden rounded-full bg-white shadow-[0_4px_12px_-4px_rgba(23,23,23,0.35)] ring-1 ring-white">
                     <Flag code={code} className="h-8 w-8 rounded-full" title={d.name} />
                   </span>
@@ -124,6 +119,13 @@ export default function Hero() {
               );
             })}
           </ul>
+        </div>
+
+        <div className="mt-9 flex flex-wrap items-center gap-3">
+          <Button href="/#counselling">Book Free Counselling</Button>
+          <Button href="/destinations" variant="ghost">
+            Explore Destinations
+          </Button>
         </div>
       </div>
 

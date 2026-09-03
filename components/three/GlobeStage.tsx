@@ -25,20 +25,24 @@ const LITE = "(prefers-reduced-motion: no-preference) and ((max-width: 1023px) o
 const STILL = "(prefers-reduced-motion: reduce)";
 
 /**
- * Portrait composition for the globe. On a phone the hero shows a large globe
- * that turns as you scroll, then sinks and fades out before the destinations
- * section — its fixed canvas sits *above* that section, so it has to be gone by
- * the time the cards arrive. No pinning: the page scrolls normally throughout.
+ * Portrait composition for the globe. On a phone the hero copy sticks to the
+ * top for a little over one screen (the sticky rule in globals.css) while the
+ * globe turns in place; then it sinks and fades out and the page scrolls on.
+ * The globe must be gone before the destinations section arrives — its fixed
+ * canvas paints on top of those cards.
  *
- * These are the mobile visibility dials. A WebGL globe can't be previewed in a
- * headless build, so tune `M_HERO` and the turn count against a real device.
- * `cy` lower = globe sits lower; `radius` bigger = fills more width.
+ * Dials — tune against a real device, a WebGL globe can't be previewed in a
+ * headless build. `cy` lower = globe sits lower; `radius` bigger = fills more
+ * width; `M_HOLD` is the sticky scroll window and MUST match the 220svh/100svh
+ * split in globals.css; `M_SPLIT` is turn time vs sink-and-fade time.
  */
-const M_HERO = { cx: 0.05, cy: -0.95, radius: 1.05 };
-/** Radians the globe turns across the mobile hero scroll. */
-const M_TURNS = -Math.PI * 2.5;
-/** Fraction of the hero scroll spent turning before the globe sinks + fades. */
-const M_SPLIT = 0.7;
+const M_HERO = { cx: 0.05, cy: -0.85, radius: 0.9 };
+/** Radians the globe turns across the mobile hero hold. */
+const M_TURNS = -Math.PI * 3;
+/** Length of the sticky "hold" (== 220svh − 100svh in globals.css). */
+const M_HOLD = "+=120%";
+/** Fraction of the hold spent turning before the globe sinks + fades. */
+const M_SPLIT = 0.72;
 
 /**
  * Owns the one persistent WebGL canvas and every ScrollTrigger that drives it.
@@ -247,7 +251,7 @@ export default function GlobeStage() {
     });
 
     /* ------------------------------------------------------------------ */
-    /* Touch and small screens: scroll-reactive globe, no pinning          */
+    /* Touch and small screens: sticky hero "hold", no ScrollTrigger pin   */
     /* ------------------------------------------------------------------ */
     mm.add(LITE, () => {
       // One shaded sphere is cheap and OpacitySync drops the canvas from the
@@ -263,52 +267,65 @@ export default function GlobeStage() {
       gsap.set(".dest-card", { opacity: 1, y: 0, filter: "none" });
       gsap.set(".hero-student", { clearProps: "opacity,transform" });
 
-      // Turn the globe as the hero scrolls, then sink + fade it out inside the
-      // hero. It must reach opacity 0 before #destinations scrolls in, because
-      // the fixed canvas paints on top of that section on mobile.
-      const seq = ScrollTrigger.create({
-        trigger: "#hero",
-        start: "top top",
-        end: "bottom top",
-        scrub: 0.5,
-        onUpdate: (self) => {
-          const p = self.progress;
-          globe.spin = M_TURNS * p;
-          if (p <= M_SPLIT) {
-            globe.cy = M_HERO.cy;
-            globe.radius = M_HERO.radius;
-            globe.opacity = 1;
-          } else {
-            const t = (p - M_SPLIT) / (1 - M_SPLIT);
-            globe.cy = M_HERO.cy - 0.4 * t;
-            globe.radius = M_HERO.radius;
-            globe.opacity = Math.max(0, 1 - t / 0.55);
-          }
+      // The hero copy is held by `position: sticky` (globals.css) for `M_HOLD`
+      // of scroll. This scrubbed timeline runs over exactly that window: the
+      // globe turns, then sinks + fades — it has to reach opacity 0 before the
+      // copy unsticks, because the fixed canvas paints on top of what's next.
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: "#hero",
+          start: "top top",
+          end: M_HOLD,
+          scrub: 0.5,
+          invalidateOnRefresh: true,
         },
       });
 
-      // The traveller fades on scroll the way it does on desktop — its
-      // page-level layer means the pinned timeline's fade never runs here.
-      const student = gsap.fromTo(
-        ".hero-student",
-        { opacity: 1, y: 0 },
-        {
-          opacity: 0,
-          y: 60,
-          ease: "none",
-          scrollTrigger: {
-            trigger: "#hero",
-            start: "22% top",
-            end: "70% top",
-            scrub: 0.4,
-          },
-        },
-      );
+      tl
+        .to(globe, { spin: M_TURNS, ease: "none", duration: M_SPLIT }, 0)
+        .fromTo(
+          ".hero-student",
+          { opacity: 1, y: 0 },
+          { opacity: 0, y: 60, ease: "power1.in", duration: 0.55 },
+          0.16,
+        )
+        .fromTo(
+          globe,
+          { cy: M_HERO.cy },
+          { cy: M_HERO.cy - 0.45, ease: "power1.in", duration: 1 - M_SPLIT, immediateRender: false },
+          M_SPLIT,
+        )
+        // Fade finishes a touch before the copy unsticks, so the canvas is gone
+        // by the time the next section scrolls under it.
+        .fromTo(
+          globe,
+          { opacity: 1 },
+          { opacity: 0, ease: "power1.in", duration: (1 - M_SPLIT) * 0.72, immediateRender: false },
+          M_SPLIT,
+        );
+
+      // A smooth, simple staggered entrance for the flag chips the first time
+      // they're on screen.
+      const chips = gsap.utils.toArray<HTMLElement>(".hero-flag-chip");
+      const chipsIn = chips.length
+        ? gsap.from(chips, {
+            opacity: 0,
+            y: 14,
+            scale: 0.7,
+            transformOrigin: "50% 100%",
+            stagger: 0.06,
+            duration: 0.5,
+            delay: 0.3,
+            ease: "power2.out",
+            scrollTrigger: { trigger: ".hero-flag-strip", start: "top 92%", once: true },
+          })
+        : null;
 
       return () => {
-        student.scrollTrigger?.kill();
-        student.kill();
-        seq.kill();
+        tl.scrollTrigger?.kill();
+        tl.kill();
+        chipsIn?.scrollTrigger?.kill();
+        chipsIn?.kill();
       };
     });
 
