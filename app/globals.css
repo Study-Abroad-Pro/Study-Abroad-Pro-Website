@@ -98,27 +98,57 @@
 @media (prefers-reduced-motion: no-preference) {
   .hero-traveller-layer {
     position: fixed;
-    height: 100%;
+    height: 100vh;
   }
 }
 
 /* Mobile hero "hold": the copy (and its flag strip) sticks to the top while
    the globe spins in place, then everything scrolls on. `#hero` keeps
    `z-index: auto` so the fixed globe canvas still sits between the sky and this
-   sticky copy (which owns a z-40 context).
-   The hold length is `min-height − 100svh` (currently 110svh) — the only place
-   it's defined; GlobeStage.tsx's timeline just runs `#hero top→bottom`.
-   Chosen so the copy unsticks exactly as #destinations enters the viewport, so
-   there's no empty gap. Motion-safe + mobile only. */
+   sticky copy (which owns a z-40 context). The hold length is
+   `min-height − 100vh`; it's sized so the copy unsticks as #destinations
+   reaches the viewport. Motion-safe + mobile only. */
 @media (max-width: 1023px) and (prefers-reduced-motion: no-preference) {
   #hero {
-    min-height: 210svh;
+    min-height: 200vh;
     overflow: visible;
   }
   #hero > .hero-copy {
     position: sticky;
     top: 0;
-    height: 100svh;
+    height: 100vh;
+  }
+}
+
+/* Everything above uses `vh` as the baseline. Where the browser supports the
+   viewport-stable `lvh` unit, switch the mobile hero's fixed/sticky boxes to
+   it so the address bar showing/hiding on scroll can't resize them:
+   - a resized globe canvas makes R3F recompute the globe's aspect-based
+     position → the globe jumps;
+   - a `100svh`/`100vh` sticky copy that's shorter than the (grown) visual
+     viewport flashes a band of globe in and out under itself as the bar
+     animates.
+   `lvh` is one value regardless of the toolbar, so none of that moves.
+   `@supports` keeps the minifier from collapsing these onto the vh rules and
+   lets no-lvh browsers keep the (still-functional) vh fallback. */
+@supports (height: 100lvh) {
+  @media (max-width: 1023px) {
+    .globe-stage {
+      height: 100lvh !important; /* beats the inline height:100% */
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .hero-traveller-layer {
+      height: 100lvh;
+    }
+  }
+  @media (max-width: 1023px) and (prefers-reduced-motion: no-preference) {
+    #hero {
+      min-height: 200lvh;
+    }
+    #hero > .hero-copy {
+      height: 100lvh;
+    }
   }
 }
 
