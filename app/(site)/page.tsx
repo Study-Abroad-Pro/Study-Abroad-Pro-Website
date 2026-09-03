@@ -50,6 +50,10 @@ export default async function Home() {
 
   return (
     <>
+      {/* Warm the globe's relief maps so it can paint the moment R3F mounts. */}
+      <link rel="preload" as="image" href="/textures/earth-bump.webp" type="image/webp" />
+      <link rel="preload" as="image" href="/textures/earth-mask.webp" type="image/webp" />
+
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(organisationLd) }}

@@ -25,6 +25,23 @@ const LITE = "(prefers-reduced-motion: no-preference) and ((max-width: 1023px) o
 const STILL = "(prefers-reduced-motion: reduce)";
 
 /**
+ * Portrait composition for the globe. On a phone the hero shows a big low
+ * horizon that turns as you scroll; the handoff then pulls it back to a small
+ * centred planet that fades out just as the destinations list begins. No
+ * pinning — the page scrolls normally the whole way.
+ *
+ * These are the mobile visibility dials. A WebGL globe can't be previewed in a
+ * headless build, so tune the four-number anchors and the turn count against a
+ * real device.
+ */
+const M_HERO = { cx: 0.05, cy: -0.95, radius: 1.05 };
+const M_STAGE = { cx: 0, cy: -0.2, radius: 0.5 };
+/** Radians the globe turns across the hero portion of the mobile scroll. */
+const M_TURNS = -Math.PI * 2.5;
+/** Fraction of the mobile scroll sequence spent on the hero spin vs the handoff. */
+const M_SPLIT = 0.62;
+
+/**
  * Owns the one persistent WebGL canvas and every ScrollTrigger that drives it.
  * Keeping the whole sequence in a single file is deliberate: hero and
  * destinations are one continuous piece of choreography, and splitting it
@@ -44,6 +61,9 @@ export default function GlobeStage() {
       // The desktop sequence renders continuously; only LITE parks the loop, so
       // reclaim it here in case we arrived from a resize that had parked it.
       setFrameloop("always");
+      // Re-seat the globe at the hero anchor: a resize up from the mobile
+      // branch leaves it wherever that sequence parked it.
+      resetGlobe();
       gsap.set(".dest-card", { opacity: 0, y: 60, filter: "blur(12px)" });
       gsap.set(".hero-outro", { opacity: 0, y: 30 });
 
@@ -228,39 +248,56 @@ export default function GlobeStage() {
     });
 
     /* ------------------------------------------------------------------ */
-    /* Touch and small screens: a slow idle globe, no pinning              */
+    /* Touch and small screens: scroll-reactive globe, no pinning          */
     /* ------------------------------------------------------------------ */
     mm.add(LITE, () => {
-      globe.cx = HERO_ANCHOR.cx;
-      globe.cy = -1.7;
-      globe.radius = 0.88;
+      // One shaded sphere is cheap and OpacitySync drops the canvas from the
+      // compositor once it fades, so the loop stays on for the whole sequence.
+      setFrameloop("always");
+
+      const lerp = gsap.utils.interpolate;
+
+      globe.cx = M_HERO.cx;
+      globe.cy = M_HERO.cy;
+      globe.radius = M_HERO.radius;
       globe.opacity = 1;
       globe.active = -1;
+      globe.spin = 0;
       gsap.set(".dest-card", { opacity: 1, y: 0, filter: "none" });
 
-      const idle = gsap.to(globe, { spin: "-=6.28318", duration: 48, ease: "none", repeat: -1 });
-
-      const fade = ScrollTrigger.create({
+      // A single trigger spanning the hero *and* the run-in to the destinations
+      // section drives everything from one progress value, so nothing fights
+      // over the shared globe object. The page is never pinned.
+      const seq = ScrollTrigger.create({
         trigger: "#hero",
-        start: "bottom 40%",
-        // The fade itself is driven from inside the render loop, so the loop
-        // can only be parked once the fade has finished.
-        onEnter: () => {
-          gsap.to(globe, {
-            opacity: 0,
-            duration: 0.4,
-            onComplete: () => setFrameloop("never"),
-          });
-        },
-        onLeaveBack: () => {
-          setFrameloop("always");
-          gsap.to(globe, { opacity: 1, duration: 0.4 });
+        start: "top top",
+        endTrigger: "#destinations",
+        end: "top 12%",
+        scrub: 0.5,
+        onUpdate: (self) => {
+          const p = self.progress;
+          if (p <= M_SPLIT) {
+            // Hero: hold the low horizon, just turn the globe.
+            const t = p / M_SPLIT;
+            globe.cx = M_HERO.cx;
+            globe.cy = M_HERO.cy;
+            globe.radius = M_HERO.radius;
+            globe.spin = M_TURNS * t;
+            globe.opacity = 1;
+          } else {
+            // Handoff: drift to centre, shrink to a planet, fade under the cards.
+            const t = (p - M_SPLIT) / (1 - M_SPLIT);
+            globe.cx = lerp(M_HERO.cx, M_STAGE.cx, t);
+            globe.cy = lerp(M_HERO.cy, M_STAGE.cy, t);
+            globe.radius = lerp(M_HERO.radius, M_STAGE.radius, t);
+            globe.spin = M_TURNS * (1 + 0.35 * t);
+            globe.opacity = t < 0.5 ? 1 : Math.max(0, 1 - (t - 0.5) / 0.4);
+          }
         },
       });
 
       return () => {
-        idle.kill();
-        fade.kill();
+        seq.kill();
       };
     });
 
@@ -268,9 +305,10 @@ export default function GlobeStage() {
     /* Reduced motion: the globe is there, it simply does not move         */
     /* ------------------------------------------------------------------ */
     mm.add(STILL, () => {
-      globe.cx = HERO_ANCHOR.cx;
-      globe.cy = -1.7;
-      globe.radius = 0.88;
+      const mobile = window.matchMedia("(max-width: 1023px)").matches;
+      globe.cx = mobile ? M_HERO.cx : HERO_ANCHOR.cx;
+      globe.cy = mobile ? M_HERO.cy : -1.7;
+      globe.radius = mobile ? M_HERO.radius : 0.88;
       globe.opacity = 1;
       globe.spin = SPIN_BASE + spinForLongitude(DESTINATIONS[0].lon);
       globe.active = -1;

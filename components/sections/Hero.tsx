@@ -43,7 +43,7 @@ export default function Hero() {
   const byCode = new Map(DESTINATIONS.map((d) => [d.code, d] as const));
 
   return (
-    <section id="hero" className="relative h-[100svh] w-full overflow-hidden bg-cream">
+    <section id="hero" className="relative min-h-[115svh] w-full overflow-hidden bg-cream lg:h-[100svh] lg:min-h-0">
       {/* ---- sky: warm sunset gradient, fades away as the globe takes over ---- */}
       <div className="hero-sky absolute inset-0" aria-hidden="true">
         <div className="absolute inset-0 bg-[radial-gradient(125%_95%_at_60%_80%,#ffe6c8_0%,#fff3e6_36%,#f8fafc_74%)]" />
@@ -89,7 +89,7 @@ export default function Hero() {
           canvas. GSAP still animates it via the shared `.hero-student` class. */}
 
       {/* ---- copy ---- */}
-      <div className="hero-copy relative z-40 mx-auto flex h-full w-full max-w-[86rem] flex-col justify-center px-6 sm:px-10">
+      <div className="hero-copy relative z-40 mx-auto flex h-full w-full max-w-[86rem] flex-col justify-start px-6 pt-28 sm:px-10 lg:justify-center lg:pt-0">
         <p className="label text-ink/70">{SITE.tagline}</p>
         <span className="mt-4 block h-[3px] w-12 rounded-full bg-brand" aria-hidden="true" />
         <h1 className="mt-6 max-w-[13ch] text-[clamp(2.5rem,5.2vw,4.6rem)] font-extrabold leading-[0.95]">
@@ -105,6 +105,23 @@ export default function Hero() {
           <Button href="/destinations" variant="ghost">
             Explore Destinations
           </Button>
+        </div>
+
+        {/* Compact destination strip — the flight-arc flags don't fit portrait. */}
+        <div className="mt-10 lg:hidden">
+          <p className="label text-ink/50">Popular destinations</p>
+          <ul className="mt-3 flex gap-2.5" aria-label="Popular study destinations">
+            {ARC_ORDER.map((code) => {
+              const d = byCode.get(code)!;
+              return (
+                <li key={code}>
+                  <span className="grid h-8 w-8 place-items-center overflow-hidden rounded-full bg-white shadow-[0_4px_12px_-4px_rgba(23,23,23,0.35)] ring-1 ring-white">
+                    <Flag code={code} className="h-8 w-8 rounded-full" title={d.name} />
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
         </div>
       </div>
 
@@ -123,10 +140,10 @@ export default function Hero() {
       {/* Legibility scrim: the photoreal globe runs dark behind the stats.
           Shares the .hero-stats class so it fades on the same tween. */}
       <div
-        className="hero-stats pointer-events-none absolute bottom-0 left-0 z-30 h-[40%] w-full bg-[linear-gradient(to_top,rgba(255,250,244,0.98)_0%,rgba(255,250,244,0.62)_52%,transparent_100%)] [mask-image:linear-gradient(to_right,black_0%,black_46%,transparent_86%)] [-webkit-mask-image:linear-gradient(to_right,black_0%,black_46%,transparent_86%)] lg:w-[64%]"
+        className="hero-stats pointer-events-none absolute bottom-0 left-0 z-30 h-[34%] w-full bg-[linear-gradient(to_top,rgba(255,250,244,0.98)_0%,rgba(255,250,244,0.62)_52%,transparent_100%)] lg:h-[40%] lg:w-[64%] lg:[mask-image:linear-gradient(to_right,black_0%,black_46%,transparent_86%)] lg:[-webkit-mask-image:linear-gradient(to_right,black_0%,black_46%,transparent_86%)]"
         aria-hidden="true"
       />
-      <ul className="hero-stats absolute bottom-8 left-6 z-40 flex flex-wrap items-center gap-x-9 gap-y-4 sm:left-10 lg:bottom-10">
+      <ul className="hero-stats absolute bottom-8 left-6 z-40 hidden flex-wrap items-center gap-x-9 gap-y-4 sm:left-10 lg:bottom-10 lg:flex">
         {HERO_STATS.map((s, i) => (
           <li key={s.label} className="flex items-center gap-3">
             <span className="grid h-11 w-11 place-items-center rounded-full ring-1 ring-brand/35">
