@@ -27,9 +27,14 @@ export default function Destinations() {
               Six destinations. One decision that changes everything.
             </h2>
           </div>
-          <Button href="/destinations" variant="outline" className="hidden shrink-0 lg:inline-flex">
-            Explore All Destinations
-          </Button>
+          {/* `hidden` on <Button> loses to its own `inline-flex` base class, so
+              hide via a wrapper — otherwise this shows on mobile and crushes
+              the heading into a one-word-per-line column. */}
+          <span className="hidden lg:contents">
+            <Button href="/destinations" variant="outline" className="shrink-0">
+              Explore All Destinations
+            </Button>
+          </span>
         </div>
 
         {/* Desktop: cards stack and swap on scroll. Elsewhere: a plain grid. */}
