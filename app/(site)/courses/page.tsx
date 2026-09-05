@@ -157,10 +157,6 @@ export default async function CoursesPage() {
                           <p className="text-[0.9375rem] leading-relaxed text-muted">
                             {course.summary}
                           </p>
-                          <span className="mt-1 inline-flex items-center gap-1.5 text-[0.875rem] font-semibold text-brand">
-                            Explore course
-                            <Arrow />
-                          </span>
                         </Link>
                       </li>
                     ))}
