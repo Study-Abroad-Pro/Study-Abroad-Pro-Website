@@ -20,6 +20,8 @@ async function counts() {
     leadsContacted,
     countriesTotal,
     countriesPublished,
+    coursesTotal,
+    coursesPublished,
     postsTotal,
     postsPublished,
   ] = await Promise.all([
@@ -28,6 +30,8 @@ async function counts() {
     db.from("leads").select("*", head).eq("status", "contacted"),
     db.from("countries").select("*", head),
     db.from("countries").select("*", head).eq("is_published", true),
+    db.from("courses").select("*", head),
+    db.from("courses").select("*", head).eq("is_published", true),
     db.from("blog_posts").select("*", head),
     db.from("blog_posts").select("*", head).eq("is_published", true),
   ]);
@@ -38,6 +42,8 @@ async function counts() {
     leadsContacted: leadsContacted.count ?? 0,
     countriesTotal: countriesTotal.count ?? 0,
     countriesPublished: countriesPublished.count ?? 0,
+    coursesTotal: coursesTotal.count ?? 0,
+    coursesPublished: coursesPublished.count ?? 0,
     postsTotal: postsTotal.count ?? 0,
     postsPublished: postsPublished.count ?? 0,
   };
@@ -75,7 +81,7 @@ export default async function AdminDashboard() {
       </header>
 
       {/* Stat cards */}
-      <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <section className="grid grid-cols-2 gap-4 lg:grid-cols-5">
         <StatCard
           label="Total leads"
           value={c.leadsTotal}
@@ -94,6 +100,12 @@ export default async function AdminDashboard() {
           value={c.countriesTotal}
           sub={`${c.countriesPublished} published`}
           href="/admin/countries"
+        />
+        <StatCard
+          label="Courses"
+          value={c.coursesTotal}
+          sub={`${c.coursesPublished} published`}
+          href="/admin/courses"
         />
         <StatCard
           label="Blog posts"

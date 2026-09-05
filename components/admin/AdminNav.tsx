@@ -34,6 +34,16 @@ const items: Item[] = [
     ),
   },
   {
+    href: "/admin/courses",
+    label: "Courses",
+    icon: (
+      <>
+        <path d="M5 4h11a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2V4Z" />
+        <path d="M5 18a2 2 0 0 1 2-2h11" />
+      </>
+    ),
+  },
+  {
     href: "/admin/blog",
     label: "Blog",
     icon: <path d="M5 4h11l3 3v13H5zM15 4v4h4M8 12h8M8 16h8" />,

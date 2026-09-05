@@ -20,6 +20,7 @@ import {
 } from "../content/site.ts";
 import { COUNTRY_CONTENT } from "../content/countries.ts";
 import { BLOG_POSTS } from "../content/blog.ts";
+import { COURSES, COURSE_CONTENT, COURSE_CATEGORIES } from "../content/courses.ts";
 
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -109,6 +110,43 @@ async function seedBlogPosts() {
   console.log(`  blog_posts     ${rows.length} upserted`);
 }
 
+async function seedCourses() {
+  const categoryLabel = new Map(COURSE_CATEGORIES.map((c) => [c.key, c.label]));
+
+  const rows = COURSES.map((course, i) => {
+    const cc = COURSE_CONTENT[course.slug];
+    if (!cc) throw new Error(`courses: missing COURSE_CONTENT for "${course.slug}"`);
+    return {
+      slug: course.slug,
+      name: course.name,
+      category: categoryLabel.get(course.category) ?? course.category,
+      summary: course.summary,
+      sort_order: i,
+      is_published: true,
+      headline: cc.headline,
+      lede: cc.lede,
+      intro: cc.intro,
+      levels: cc.levels,
+      content: {
+        about: cc.about,
+        whatYouStudy: cc.whatYouStudy,
+        whoFor: cc.whoFor,
+        careers: cc.careers,
+        careersNote: cc.careersNote,
+        admissionsNote: cc.admissionsNote ?? "",
+        feesNote: cc.feesNote ?? "",
+        whyNote: cc.whyNote ?? "",
+      },
+      meta_title: `${cc.headline} | Study Abroad Pro`,
+      meta_description: cc.lede,
+    };
+  });
+
+  const { error } = await db.from("courses").upsert(rows, { onConflict: "slug" });
+  if (error) throw new Error(`courses: ${error.message}`);
+  console.log(`  courses        ${rows.length} upserted`);
+}
+
 async function seedSiteSettings() {
   const row = {
     id: true,
@@ -134,6 +172,7 @@ async function seedSiteSettings() {
 async function main() {
   console.log("Seeding Supabase from content/*.ts ...");
   await seedCountries();
+  await seedCourses();
   await seedBlogPosts();
   await seedSiteSettings();
   console.log("Done.");
