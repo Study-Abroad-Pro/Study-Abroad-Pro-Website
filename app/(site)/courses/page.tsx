@@ -157,20 +157,14 @@ export default async function CoursesPage() {
                           <p className="text-[0.9375rem] leading-relaxed text-muted">
                             {course.summary}
                           </p>
+                          <span className="mt-1 inline-flex items-center gap-1.5 text-[0.875rem] font-semibold text-brand">
+                            Explore course
+                            <Arrow />
+                          </span>
                         </Link>
                       </li>
                     ))}
                   </ul>
-
-                  <div className="mt-10" data-reveal>
-                    <Link
-                      href="#course-finder"
-                      className="group inline-flex items-center gap-2 text-[0.9375rem] font-semibold text-brand underline-offset-4 hover:underline"
-                    >
-                      {group.exploreLabel}
-                      <Arrow />
-                    </Link>
-                  </div>
                 </div>
               ))}
             </div>

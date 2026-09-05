@@ -77,7 +77,7 @@ export default function CourseCategoryAccordion({
               hidden={!isOpen}
               className="border-t border-line"
             >
-              <ul className="divide-y divide-line px-5">
+              <ul className="divide-y divide-line px-5 pb-2">
                 {group.courses.map((course) => (
                   <li key={course.slug}>
                     <Link
@@ -99,16 +99,6 @@ export default function CourseCategoryAccordion({
                   </li>
                 ))}
               </ul>
-
-              <div className="rounded-b-2xl bg-paper px-5 py-4">
-                <Link
-                  href="#course-finder"
-                  className="group inline-flex items-center gap-2 text-[0.9375rem] font-semibold text-brand underline-offset-4 hover:underline"
-                >
-                  {group.exploreLabel}
-                  <Arrow />
-                </Link>
-              </div>
             </div>
           </div>
         );
