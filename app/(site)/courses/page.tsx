@@ -4,6 +4,7 @@ import Button, { Arrow } from "@/components/ui/Button";
 import ScrollReveals from "@/components/motion/ScrollReveals";
 import Counselling from "@/components/sections/Counselling";
 import FinalCta from "@/components/sections/FinalCta";
+import CourseCategoryAccordion from "@/components/sections/CourseCategoryAccordion";
 import { COURSE_FINDER_FACTORS } from "@/content/courses";
 import { getCourseCategoryGroups } from "@/lib/data/courses";
 
@@ -128,49 +129,55 @@ export default async function CoursesPage() {
             hospitality, explore study options across a wide range of fields.
           </p>
 
-          <div className="mt-16 flex flex-col gap-20">
-            {groups.map((group) => (
-              <div key={group.key} id={group.key} className="scroll-mt-24">
-                <h3
-                  className="border-b border-line pb-4 font-display text-xl font-extrabold tracking-tight sm:text-2xl"
-                  data-reveal
-                >
-                  {group.label}
-                </h3>
+          {/* Mobile: an accordion, one card per category. Tablet and up: the
+              always-open grid below (hidden here, shown from `sm:`). */}
+          <div className="mt-16">
+            <CourseCategoryAccordion groups={groups} />
 
-                <ul className="mt-8 grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-                  {group.courses.map((course) => (
-                    <li key={course.slug} data-reveal>
-                      <Link
-                        href={`/courses/${course.slug}`}
-                        className="group flex flex-col gap-2"
-                      >
-                        <h4 className="font-display text-lg font-bold leading-snug group-hover:text-brand">
-                          {course.name}
-                        </h4>
-                        <p className="text-[0.9375rem] leading-relaxed text-muted">
-                          {course.summary}
-                        </p>
-                        <span className="mt-1 inline-flex items-center gap-1.5 text-[0.875rem] font-semibold text-brand">
-                          Explore course
-                          <Arrow />
-                        </span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-
-                <div className="mt-10" data-reveal>
-                  <Link
-                    href="#course-finder"
-                    className="group inline-flex items-center gap-2 text-[0.9375rem] font-semibold text-brand underline-offset-4 hover:underline"
+            <div className="hidden sm:flex sm:flex-col sm:gap-20">
+              {groups.map((group) => (
+                <div key={group.key} id={group.key} className="scroll-mt-24">
+                  <h3
+                    className="border-b border-line pb-4 font-display text-xl font-extrabold tracking-tight sm:text-2xl"
+                    data-reveal
                   >
-                    {group.exploreLabel}
-                    <Arrow />
-                  </Link>
+                    {group.label}
+                  </h3>
+
+                  <ul className="mt-8 grid gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+                    {group.courses.map((course) => (
+                      <li key={course.slug} data-reveal>
+                        <Link
+                          href={`/courses/${course.slug}`}
+                          className="group flex flex-col gap-2"
+                        >
+                          <h4 className="font-display text-lg font-bold leading-snug group-hover:text-brand">
+                            {course.name}
+                          </h4>
+                          <p className="text-[0.9375rem] leading-relaxed text-muted">
+                            {course.summary}
+                          </p>
+                          <span className="mt-1 inline-flex items-center gap-1.5 text-[0.875rem] font-semibold text-brand">
+                            Explore course
+                            <Arrow />
+                          </span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+
+                  <div className="mt-10" data-reveal>
+                    <Link
+                      href="#course-finder"
+                      className="group inline-flex items-center gap-2 text-[0.9375rem] font-semibold text-brand underline-offset-4 hover:underline"
+                    >
+                      {group.exploreLabel}
+                      <Arrow />
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
         </div>
       </section>
