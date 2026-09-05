@@ -35,7 +35,7 @@ export default function CourseCategoryAccordion({
 }: {
   groups: CourseCategoryGroup[];
 }) {
-  const [openKey, setOpenKey] = useState<string | null>(groups[0]?.key ?? null);
+  const [openKey, setOpenKey] = useState<string | null>(null);
   const base = useId();
 
   return (
@@ -75,30 +75,40 @@ export default function CourseCategoryAccordion({
               role="region"
               aria-labelledby={buttonId}
               hidden={!isOpen}
-              className="flex flex-col gap-6 border-t border-line px-5 pb-6 pt-5"
+              className="border-t border-line"
             >
-              <ul className="flex flex-col gap-5">
+              <ul className="divide-y divide-line px-5">
                 {group.courses.map((course) => (
                   <li key={course.slug}>
-                    <Link href={`/courses/${course.slug}`} className="group flex flex-col gap-1.5">
-                      <span className="font-display text-base font-bold leading-snug group-hover:text-brand">
-                        {course.name}
+                    <Link
+                      href={`/courses/${course.slug}`}
+                      className="group flex items-center justify-between gap-4 py-4"
+                    >
+                      <span className="flex flex-col gap-1">
+                        <span className="font-display text-base font-bold leading-snug group-hover:text-brand">
+                          {course.name}
+                        </span>
+                        <span className="text-[0.875rem] leading-relaxed text-muted">
+                          {course.summary}
+                        </span>
                       </span>
-                      <span className="text-[0.875rem] leading-relaxed text-muted">
-                        {course.summary}
+                      <span className="shrink-0 text-brand">
+                        <Arrow />
                       </span>
                     </Link>
                   </li>
                 ))}
               </ul>
 
-              <Link
-                href="#course-finder"
-                className="group inline-flex items-center gap-2 text-[0.9375rem] font-semibold text-brand underline-offset-4 hover:underline"
-              >
-                {group.exploreLabel}
-                <Arrow />
-              </Link>
+              <div className="rounded-b-2xl bg-paper px-5 py-4">
+                <Link
+                  href="#course-finder"
+                  className="group inline-flex items-center gap-2 text-[0.9375rem] font-semibold text-brand underline-offset-4 hover:underline"
+                >
+                  {group.exploreLabel}
+                  <Arrow />
+                </Link>
+              </div>
             </div>
           </div>
         );
